@@ -35,8 +35,9 @@ toyota_models = {
 }
 
 toyota_corolla_subs = {
-    "le": [" le "],
-    "se": [" se "],
+    "le": [" le ", "corolla le"],
+    "se": [" se ", "corolla se"],
+    "ce": [" ce ", "corolla ce"]
 }
 
 toyota_corolla_cross_subs = {
@@ -79,6 +80,28 @@ toyota_models_to_subs = {
     "yaris cross" : toyota_yaris_cross_subs,
     "yaris" : toyota_yaris_subs
      
+}
+
+#----------------------------------------------------------------------
+#Kia
+#----------------------------------------------------------------------
+
+kia_models = {
+    "soul" : ["soul",],
+    "sportage" : ["sportage"],
+}
+
+kia_soul_subs = {
+
+}
+    
+kia_sportage_subs = {
+    
+}
+
+toyota_models_to_subs = {
+    "soul" : kia_soul_subs,
+    "sportage" : kia_sportage_subs,    
 }
 
 #----------------------------------------------------------------------
