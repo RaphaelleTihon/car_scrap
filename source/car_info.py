@@ -99,7 +99,7 @@ kia_sportage_subs = {
     
 }
 
-toyota_models_to_subs = {
+kia_models_to_subs = {
     "soul" : kia_soul_subs,
     "sportage" : kia_sportage_subs,    
 }
@@ -200,6 +200,7 @@ mini_models_to_subs = {
 
 brand_to_models = {
     "toyota" : toyota_models,
+    "kia" : kia_models,
     "ford" : ford_models,
     "honda" : honda_models,
     "nissan" : nissan_models,
@@ -209,6 +210,7 @@ brand_to_models = {
 
 brand_models_to_subs = {
     "toyota" : toyota_models_to_subs,
+    "kia" : kia_models_to_subs,
     "ford" : ford_models_to_subs,
     "honda" : honda_models_to_subs,
     "nissan" : nissan_models_to_subs,
