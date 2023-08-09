@@ -9,7 +9,9 @@ cur = con.cursor()
 def add_df_values_to_db(df):
     list_string_values = []
 
-    def get_row_strings(row):
+    row_tuples = [ tuple([v for k, v in row.items()]) for ix, row in df.iterrows() ]
+
+    """def get_row_strings(row): OLD IMPLEMENTATION, TO REMOVE AFTER LENGTHY SUCCESSFUL TESTING OF NEW ONE
 
         row_list = row.values.flatten().tolist()
         row_string = "("
@@ -50,15 +52,41 @@ def add_df_values_to_db(df):
 
     insert_string += f"{final_list[-1]}"
 
-    logging.debug(insert_string)
+    logging.debug(insert_string)"""
+
+    seen_urls = []
+    final_entry_tuples = []
+    
+    for entry_tuple in row_tuples:
+        
+        url = entry_tuple[-1]
+        cur.execute(f"SELECT brand, id FROM car WHERE url='{url}'")
+        
+        if len(cur.fetchall()) == 0 and url not in seen_urls:
+            
+            final_entry_tuples.append(entry_tuple)
+            #sometimes the same ad can appear twice on a page, 
+            #this checks and prevents double insertions in that case
+            seen_urls.append(url) 
+
+        
+    number_columns_string=f"({','.join(['?']*len(car_entry_types))})"
+    insert_string = f"INSERT into car VALUES {number_columns_string}"
+
     try:
-        cur.execute(insert_string)
+        cur.executemany(insert_string, final_entry_tuples)
         con.commit()
     except Exception as e:
         print(insert_string)
+        print(final_entry_tuples)
         raise(e)
 
 def get_size_db():
  
     cur.execute("SELECT COUNT(*) FROM car")
     return cur.fetchall()[0][0]
+
+def get_brand_model_entries(brand, model):
+
+    cur.execute(f"SELECT * FROM car WHERE brand='{brand}' AND model='{model}'")
+    return cur.fetchall()
