@@ -90,3 +90,33 @@ def get_brand_model_entries(brand, model):
 
     cur.execute(f"SELECT * FROM car WHERE brand='{brand}' AND model='{model}'")
     return cur.fetchall()
+
+def get_all():
+    
+    cur.execute("SELECT * FROM car")
+    return cur.fetchall()
+
+def update_entry(df, columns_to_update):
+    """Columns to update must be a list of columns present in the df AND in the table"""
+
+    columns_to_update.append("url") #adding url to be part of the tuple
+    df = df[columns_to_update]
+    row_tuples = [ tuple([v for k, v in row.items()]) for ix, row in df.iterrows() ] #creating tuples to be added
+
+    columns_to_update.pop() #do not update url
+
+    update_string = "UPDATE car SET "
+    for column in columns_to_update:
+        update_string += f"{column} = ?,"
+    update_string = update_string[:-1] #remove last comma
+    update_string += "WHERE url = ?"
+
+    try:
+        cur.executemany(update_string, row_tuples)
+        con.commit()
+    except Exception as e:
+        print(update_string)
+        print(row_tuples)
+        raise(e)
+    
+    pass

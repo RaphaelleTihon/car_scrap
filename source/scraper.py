@@ -113,25 +113,25 @@ def get_brand_models(title, brand = None):
 
 def get_submodel(title, brand, model):
     
-    sub_model = "Not Recognized"
+    submodel = "Not Recognized"
 
     if brand not in car_info.brand_models_to_subs.keys():
-        return sub_model
+        return submodel
     
     brand_models_to_sub = car_info.brand_models_to_subs[brand]
 
     if model not in brand_models_to_sub.keys():
-        return sub_model
+        return submodel
 
     model_to_subs = brand_models_to_sub[model]
 
     for key in model_to_subs.keys():
         for sub_name in model_to_subs[key]:
             if sub_name in title:
-                sub_model = key
-                #logging.debug(sub_model)
-                return sub_model
-    return sub_model
+                submodel = key
+                #logging.debug(submodel)
+                return submodel
+    return submodel
 #----------------------------------------------------------------------------------------------------------------------
 
 def parse_price(price):
@@ -150,6 +150,8 @@ def parse_price(price):
         return -1
     elif price == "Gratuit":
         return -2
+    elif price == "Échange":
+        return -3
 
     return int(price)
 #----------------------------------------------------------------------------------------------------------------------
@@ -228,7 +230,7 @@ def get_kijiji_ads(n=1):
             title = item.select("a.title")[0].text 
             title, brand = parse_title(title)
             model = get_brand_models(title, brand)
-            sub_model = get_submodel(title, brand, model)
+            submodel = get_submodel(title, brand, model)
             price = item.select("div.price")[0].text
             details = item.select("div.details")[0].text
             date = item.select("span.date-posted")[0].text
@@ -263,7 +265,7 @@ def get_kijiji_ads(n=1):
             data["id"].append(id)
             data["brand"].append(brand)
             data["model"].append(model)
-            data["submodel"].append(sub_model)
+            data["submodel"].append(submodel)
             data["power"].append(power)
             data["year"].append(year)
             data["km"].append(details[1])
@@ -284,13 +286,26 @@ def get_kijiji_ads(n=1):
 
 #----------------------------------------------------------------------------------------------------------------------
 
-def reparse():
-    
-    df = pd.read_csv("first_batch.csv")
-    
-    df["model"] = df.apply(lambda row: get_brand_models_reparse(row, brand="toyota"), axis=1)
-    df["model"] = df.apply(lambda row: get_brand_models_reparse(row, brand="ford"), axis=1)
-    df.to_csv("first_batch.csv", index=False)
+def reparse_title(df):
+
+    def reparse_and_filter(row):
+        old_title = row["title"]
+        old_brand = row["brand"]
+        old_model = row["model"]
+        old_submodel = row["submodel"]
+        title, brand = parse_title(old_title)
+        model = get_brand_models(title, brand)
+        submodel = get_submodel(title, brand, model)
+
+        is_modified = 0
+        if title != old_title or brand != old_brand or model != old_model or old_submodel != submodel:
+            is_modified = 1
+
+        return pd.Series([title, old_title, brand, old_brand, model, old_model, submodel, old_submodel, row["url"], is_modified], 
+                         index=["title", "old_tilte", "brand", "old_brand", "model", "old_model", "submodel", "old_submodel", "url", "is_modified"])
+
+    updates_df = pd.DataFrame(df.apply(lambda row: reparse_and_filter(row), axis=1))
+    return updates_df
 
 
 df = get_kijiji_ads(1)
