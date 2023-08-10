@@ -209,7 +209,7 @@ def get_kijiji_ads(n=1):
     """
 
     #https://www.kijiji.ca/b-autos-camions/ville-de-montreal/used/page-3/c174l1700281a49
-    first = "https://www.kijiji.ca/b-cars-trucks/ville-de-montreal/c174l1700281?sort=dateDesc"
+    first = "https://www.kijiji.ca/b-cars-trucks/grand-montreal/c174l80002?sort=dateDesc"
     #iter_on = f"https://www.kijiji.ca/b-autos-camions/ville-de-montreal/new__used/page-{num}/c174l1700281a49"
     request_url = first
 
