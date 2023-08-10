@@ -26,7 +26,7 @@ def reparse_title_and_override_db():
     logging.info(f"Number of entries in db: {len(updates_df)}")
     updates_df = updates_df[updates_df["is_modified"] == 1]
     logging.info(f"Number of entries with updated information: {len(updates_df)}")
-    updates_df.to_csv("csv_data/test_updates.csv")
+    #updates_df.to_csv("csv_data/test_updates.csv")
     update_entry(updates_df, ["title", "brand", "model", "submodel"])
 
     #cursor.execute('''UPDATE books SET price = ? WHERE id = ?''', (newPrice, book_id))
