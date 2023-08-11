@@ -17,7 +17,7 @@ def main_loop():
         add_df_values_to_db(df)        
         size_db = get_size_db()
         logging.info(f"Current size of database: {size_db}")
-        time.sleep(300)
+        time.sleep(120)
 
 def reparse_title_and_override_db():
     all_data = get_all()
