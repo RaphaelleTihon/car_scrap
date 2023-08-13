@@ -4,7 +4,7 @@ import re
 import pandas as pd
 import car_info as car_info
 from datetime import datetime, timedelta
-from setup_db import car_entry_columns
+from setup_db import car_entry_columns, MODEL_TRACKED_LIST
 import logging
 import pytz
 
@@ -278,6 +278,10 @@ def get_kijiji_ads(n=1):
             data["minute_posted"].append(minute_posted)
             data["time_until_unavailable"].append(-1)
             data["url"].append(item_url)
+            if model in MODEL_TRACKED_LIST:
+                data["tracking"].append(1)
+            else:
+                data["tracking"].append(0)
 
         request_url = f"https://www.kijiji.ca/b-cars-trucks/ville-de-montreal/page-{page_num+2}/c174l1700281?sort=dateDesc"
 
@@ -308,6 +312,6 @@ def reparse_title(df):
     return updates_df
 
 
-df = get_kijiji_ads(1)
+#df = get_kijiji_ads(1)
 #reparse()
 #reparse_clean()
