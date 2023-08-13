@@ -59,7 +59,8 @@ def add_df_values_to_db(df):
     
     for entry_tuple in row_tuples:
         
-        url = entry_tuple[-1]
+        #The db is poorly structured, the url, the primary, should be the first column so that adding columns does not mess up indexes
+        url = entry_tuple[-2]
         cur.execute(f"SELECT brand, id FROM car WHERE url='{url}'")
         
         if len(cur.fetchall()) == 0 and url not in seen_urls:
