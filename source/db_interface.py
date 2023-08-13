@@ -97,6 +97,10 @@ def get_all():
     cur.execute("SELECT * FROM car")
     return cur.fetchall()
 
+def get_all_tracking():
+    cur.execute("SELECT * FROM car WHERE tracking = 1")
+    return cur.fetchall()
+
 def update_entry(df, columns_to_update):
     """Columns to update must be a list of columns present in the df AND in the table"""
 

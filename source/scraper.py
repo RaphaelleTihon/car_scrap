@@ -8,6 +8,7 @@ from setup_db import car_entry_columns, MODEL_TRACKED_LIST
 import logging
 import pytz
 
+
 hybrid_option = ["hybrid", "hybride"]
 electric_option = ["electrique", "électrique", "éléctrique", "electric"]
 
@@ -214,7 +215,7 @@ def get_kijiji_ads(n=1):
     request_url = first
 
     data = { column : [] for column in car_entry_columns}
-    for page_num in range(1):
+    for page_num in range(n):
 
         page=requests.get(request_url)
         soup=souper(page.content, "html.parser")
@@ -311,6 +312,35 @@ def reparse_title(df):
     updates_df = pd.DataFrame(df.apply(lambda row: reparse_and_filter(row), axis=1))
     return updates_df
 
+def track(df):
+
+    logging.info(f"Currently tracking {len(df)} ads")
+
+    for idx, row in df.iterrows():
+
+        url = row["url"]
+        full_url = f"https://www.kijiji.ca{url}"
+        page=requests.get(full_url)
+        soup=souper(page.content, "html.parser")
+        expired_id = soup.select("div.expired-ad-container")
+
+        if len(expired_id) > 0:
+            year = row["year_posted"]; month = row["month_posted"]; day = row["day_posted"]; hour = row["hour_posted"]; minute = row["minute_posted"]
+            # datetime(year, month, day, hour, minute, second, microsecond)
+            datetime_posted = datetime(year, month, day, hour, minute)
+            now = datetime.now()
+
+            datetime_delta = now - datetime_posted
+            hours = (datetime_delta.days*24)+(datetime_delta.seconds)/3600
+
+            df.at[idx, "tracking"] = 0
+            df.at[idx, "time_until_unavailable"] = hours
+            logging.info(f"Ad '{row['title']}' has been removed after {hours:.1f} hours")
+
+        else:
+            pass
+
+    return df
 
 #df = get_kijiji_ads(1)
 #reparse()
