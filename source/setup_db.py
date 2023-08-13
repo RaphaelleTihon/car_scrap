@@ -47,7 +47,7 @@ car_entry_types = [
     "num", #tracking
 ]
 
-MODEL_TRACKED_LIST = []
+MODEL_TRACKED_LIST = ["corolla", "rav4", "civic", "rogue"]
 
 def convert_df_types(df):
 
@@ -101,7 +101,7 @@ def add_column():
 
 if __name__ == "__main__":
 
-    add_column()
+    #add_column()
     con = sqlite3.connect("database/kijiji_car_db")
     cur = con.cursor()
     a = cur.execute("PRAGMA table_info('car')")
@@ -109,9 +109,14 @@ if __name__ == "__main__":
         #it's the name of the column
         print(column_info)
 
-    url_test = "/v-autos-camions/ville-de-montreal/2021-toyota-corolla-le-upgrade-mags-toit-ouvrant/m6060724"
+    url_tests = [
+        "/v-autos-camions/ville-de-montreal/super-toyota-corolla-2000-188789km-drive-excellent/1667460327", #not available
+        "/v-autos-camions/ville-de-montreal/2005-toyota-corolla-ce-groupe-elec/m6865447", #available
+        "/v-autos-camions/ville-de-montreal/2007-toyota-corolla-ce-1-proprietaire-jamais-accidente-la-clim/m6844350", #available
+    ]
 
+    #for url_test in url_tests:
     #quer = cur.execute(f"SELECT * FROM car WHERE url='{url_test}'")
     #print(quer.fetchall())
-    #cur.execute(f"UPDATE car SET tracking =  WHERE url = '{url_test}'")
-    #con.commit()
+    #    cur.execute(f"UPDATE car SET tracking = 1 WHERE url = '{url_test}'")
+    #    con.commit()
