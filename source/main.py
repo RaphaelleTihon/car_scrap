@@ -20,7 +20,7 @@ def main_loop():
     def scrape_loop():
         while True:
             scrape()
-            time.sleep(180)
+            time.sleep(300)
 
     def track_loop():
         while True:

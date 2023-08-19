@@ -1,8 +1,9 @@
 import sqlite3
 import pandas as pd
-#import db_interface
-#GOLDEN VALUES FOR DATABASE COLUMNS
-#The primary key, the url, must be the last entry
+
+# import db_interface
+# GOLDEN VALUES FOR DATABASE COLUMNS
+# The primary key, the url, must be the last entry
 car_entry_columns = [
     "title",
     "id",
@@ -21,43 +22,42 @@ car_entry_columns = [
     "minute_posted",
     "time_until_unavailable",
     "url",
-    "tracking"
+    "tracking",
 ]
 
-#Note: -1 is equivalent to Unknown for numerical entries
+# Note: -1 is equivalent to Unknown for numerical entries
 
 car_entry_types = [
-    "str", #title
-    "num", #id
-    "str", #brand
-    "str", #model
-    "str", #submodel
-    "str", #power
-    "num", #year
-    "num", #km
-    "str", #transmission
-    "num", #price some ads have "surdemnande" which is transformed into -1
-    "num", #day posted
-    "num", #month posted
-    "num", #year posted
-    "num", #hour posted
-    "num", #minute posted
-    "num", #time until unavailable
-    "str", #url
-    "num", #tracking
+    "str",  # title
+    "num",  # id
+    "str",  # brand
+    "str",  # model
+    "str",  # submodel
+    "str",  # power
+    "num",  # year
+    "num",  # km
+    "str",  # transmission
+    "num",  # price some ads have "surdemnande" which is transformed into -1
+    "num",  # day posted
+    "num",  # month posted
+    "num",  # year posted
+    "num",  # hour posted
+    "num",  # minute posted
+    "num",  # time until unavailable
+    "str",  # url
+    "num",  # tracking
 ]
 
 MODEL_TRACKED_LIST = ["corolla", "rav4", "civic", "rogue"]
 
+
 def convert_df_types(df):
-
     for i, column in enumerate(car_entry_columns):
-
         if car_entry_types[i] == "num":
-
             df[column] = pd.to_numeric(df[column])
 
     return df
+
 
 def create_kijiji_db():
     con = sqlite3.connect("database/kijiji_car_db")
@@ -69,7 +69,7 @@ def create_kijiji_db():
             table_column_strings += f"{car_entry_columns[i]} NOT NULL PRIMARY KEY,"
         else:
             table_column_strings += f"{car_entry_columns[i]},\n"
-        
+
     table_column_strings = table_column_strings[:-1]
 
     print(table_column_strings)
@@ -79,11 +79,10 @@ def create_kijiji_db():
     a = cur.execute("PRAGMA table_info('car')")
 
     for i in a:
-
         print(i)
 
-def add_column():
 
+def add_column():
     columns_to_add = ["tracking"]
 
     con = sqlite3.connect("database/kijiji_car_db")
@@ -91,21 +90,21 @@ def add_column():
 
     a = cur.execute("PRAGMA table_info('car')")
     for column_info in a:
-        #it's the name of the column
+        # it's the name of the column
         if column_info[1] in columns_to_add:
-            raise Exception(f"Tried adding {columns_to_add} but column {column_info[1]} already exists in the database")
-        
+            raise Exception(
+                f"Tried adding {columns_to_add} but column {column_info[1]} already exists in the database"
+            )
+
     for column in columns_to_add:
         cur.execute(f"alter table car add column {column} ")
 
 
 if __name__ == "__main__":
-
-    #add_column()
+    # add_column()
     con = sqlite3.connect("database/kijiji_car_db")
     cur = con.cursor()
     a = cur.execute("PRAGMA table_info('car')")
     for column_info in a:
-        #it's the name of the column
+        # it's the name of the column
         print(column_info)
-
