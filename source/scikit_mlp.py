@@ -10,6 +10,11 @@ import numpy as np
 from setup_db import convert_df_types
 import car_info as car_info
 
+<<<<<<< HEAD
+=======
+import sys
+
+>>>>>>> dev/ver-0.1
 
 class MultiPolyRegr:
     """
@@ -146,8 +151,13 @@ class Scaler:
 
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> dev/ver-0.1
 class LayeredModel:
     """Infers"""
 
@@ -262,8 +272,13 @@ def mean_percentage_error(real_values, prediction):
 def find_scaling(x, y):
     """
     find the best exponent value to scale the x data so that it's linearly correlated with y
+<<<<<<< HEAD
     the search done here supposes that the linear r2 coefficient is concave, meaning
     that there is a global minimum and no local minima
+=======
+    the search done here supposes that the linear r2 coefficient function as a single
+    minimum and no local minimums, meaning
+>>>>>>> dev/ver-0.1
     """
 
     minimum = np.min(x)
@@ -288,6 +303,7 @@ def get_valid_data(df):
     df = df[df["price"] > 1000]  # remove dumb ads with prices of 1
     print("Data with price and km info: ", len(df))
     df = df[df["year"] > 0]
+    df = df[df["year"] <= 2023]
     print("Data with year, price and km info:", len(df))
 
     return df
@@ -405,18 +421,101 @@ if __name__ == "__main__2":
 
     df.sort_values(by=["price"], ascending=True, inplace=True)
 
+<<<<<<< HEAD
     # print_df = df[["title", "price", "url"]]
     # urls = df["url"].values
     # print(urls[-1])
     # print(print_df.head(10))
+=======
+    df, _, _ = get_all_model_data("toyota", "corolla")
+>>>>>>> dev/ver-0.1
 
-    features = get_year_km_feature(df)
-    prices = get_objective(df)
+    print("-------------Layered double polyRegr stats")
 
+<<<<<<< HEAD
     # print(features)
+=======
+    non_tracked_df = df[df["time_until_unavailable"] == -1]
+    tracked_df = df[df["time_until_unavailable"] != -1]
+>>>>>>> dev/ver-0.1
 
-    df, features, prices = get_all_model_data("toyota", "corolla")
+    non_tracked_features = get_year_km_feature(non_tracked_df)
+    non_tracked_prices = get_objective(non_tracked_df)
+    categories = get_submodel_category_feature(non_tracked_df, "toyota", "corolla")
+    new_features = np.zeros(
+        [len(non_tracked_features), non_tracked_features.shape[1] + categories.shape[1]]
+    )
+    new_features[:, :2] = non_tracked_features
+    new_features[:, 2:] = categories
+    non_tracked_features = new_features
 
+    tracked_features = get_year_km_feature(tracked_df)
+    tracked_prices = get_objective(tracked_df)
+    categories = get_submodel_category_feature(tracked_df, "toyota", "corolla")
+    new_features = np.zeros(
+        [len(tracked_features), tracked_features.shape[1] + categories.shape[1]]
+    )
+    new_features[:, :2] = tracked_features
+    new_features[:, 2:] = categories
+    tracked_features = new_features
+
+    # X_train, X_test, y_train, y_test = train_test_split(
+    #    features, prices, random_state=1
+    # )
+
+    layered_regr = LayeredModel(
+        [MultiPolyRegr, MultiPolyRegr], [[0], [1], [2, 3, 4, 5]]
+    )
+    layered_regr.fit(non_tracked_features, non_tracked_prices)
+    train_predictions = layered_regr.predict(non_tracked_features)
+    test_predictions = layered_regr.predict(tracked_features)
+    print(
+        "train MAPE: ",
+        mean_absolute_percentage_error(non_tracked_prices, train_predictions),
+    )
+    print(
+        "test MAPE: ", mean_absolute_percentage_error(tracked_prices, test_predictions)
+    )
+    print("train MPE", mean_percentage_error(non_tracked_prices, train_predictions))
+    print("test MPE", mean_percentage_error(tracked_prices, test_predictions))
+
+    full_predictions = layered_regr.predict(tracked_features)
+    percentage_errors = (tracked_prices - full_predictions) / tracked_prices
+
+    tracked_df["predictions"] = full_predictions
+    tracked_df["error"] = percentage_errors
+
+    tracked_df = tracked_df[
+        [
+            "title",
+            "submodel",
+            "km",
+            "year",
+            "price",
+            "predictions",
+            "error",
+            "time_until_unavailable",
+            "url",
+        ]
+    ]
+    tracked_df.to_csv("csv_data/corolla_predictions.csv")
+
+    larger_predictions = np.where(train_predictions > non_tracked_prices, 1, 0)
+
+    # perc_df = pd.DataFrame(percentage_errors, columns = ["error"])
+    # perc_df.to_csv("csv_data/percentage_errors.csv")
+
+    print(
+        f"Number of predictions above real cost: {np.sum(larger_predictions)}, number of entries: {len(train_predictions)}"
+    )
+
+
+def plot_year_price(brand, model, show_fitted_curve):
+    all_data = get_brand_model_entries(brand, model)
+    df = pd.DataFrame(all_data, columns=car_entry_columns)
+    df = convert_df_types(df)
+
+<<<<<<< HEAD
     # print(features)
     # exit()
 
@@ -426,10 +525,43 @@ if __name__ == "__main__2":
     years = features[:, 0]
     scaled_kms = (kms - 41) ** (0.7)
     scaled_years = (years - 2000) ** (2.3)
+=======
+    df = df[df["km"] < 8e5]
 
-    scaled_features = np.array([scaled_years, scaled_kms])
-    scaled_features = scaled_features.transpose()
+    # df = df[df["year"] == 2020]
 
+    df = get_valid_data(df)
+    years = df["year"].values
+    kms = df["km"].values
+    prices = df["price"].values
+
+    regr = MultiPolyRegr()
+    years = years.reshape(-1, 1)
+    print(years.shape)
+    regr.fit(years, prices)
+    # minimums, best_coeffs, coeffs, r2_scores = regr.find_scaling_coeff(years, prices)
+    years_range = df["year"].unique()
+    years_range.sort()
+    years_range = np.array(years_range).reshape(-1, 1)
+
+    # fitted_line_plot = (years_range-minimums) ** (best_coeffs)
+
+    predictions = regr.predict(years_range)
+
+    # print(minimums, best_coeffs)
+    plt.scatter(years, prices)
+
+    if show_fitted_curve:
+        plt.plot(years_range, predictions, c="r")
+
+    plt.xlabel("Year")
+    plt.ylabel("Price $CAD")
+    plt.title(f"Price of {brand.capitalize()} {model.capitalize()}s given the year")
+    plt.show()
+>>>>>>> dev/ver-0.1
+
+
+<<<<<<< HEAD
     # plt.scatter(scaled_kms, prices)
     # plt.show()
 
@@ -442,37 +574,65 @@ if __name__ == "__main__2":
 
     full_preds = reg.predict(scaled_years.reshape(-1, 1))
     # find_scaling(full_preds, prices)
+=======
+def plot_year_mileage_price(year, brand, model, show_fitted_curve, cat=False):
+    all_data = get_brand_model_entries(brand, model)
+    df = pd.DataFrame(all_data, columns=car_entry_columns)
+    df = convert_df_types(df)
 
-    train_predictions = reg.predict(X_train)
-    print("train R2: ", reg.score(X_train, y_train))
-    print("train Mape: ", mean_absolute_percentage_error(y_train, train_predictions))
-    print("test R2: ", reg.score(X_test, y_test))
-    print("test Mape: ", mean_absolute_percentage_error(y_test, predictions))
+    df = df[df["km"] < 8e5]
 
-    print("-------------PolyRegr stats")
+    print(len(df))
+    # df = df[df["year"] == 2020]
 
+    df = get_valid_data(df)
+    years = df["year"].values
+    kms = df["km"].values
+    prices = df["price"].values
+>>>>>>> dev/ver-0.1
+
+    df_year = df[df["year"] == year]
+    kms_year = df_year["km"].values
+    prices_year = df_year["price"].values
+
+    km_range = np.max(kms_year) - np.min(kms_year)
+    km_range = np.arange(np.min(kms_year), np.max(kms_year), km_range // 100)
+
+<<<<<<< HEAD
     X_train, X_test, y_train, y_test = train_test_split(
         features, prices, random_state=1
     )
     kms_train = X_train[:, 1]
     years_train = X_train[:, 0]
+=======
+    # print(km_range)
+>>>>>>> dev/ver-0.1
 
-    poly_regr1 = MultiPolyRegr()
-    poly_regr1.fit(years_train.reshape(-1, 1), y_train)
+    regr1 = MultiPolyRegr()
+    regr2 = MultiPolyRegr()
 
-    pred_layer1 = poly_regr1.predict(years_train.reshape(-1, 1))
-    poly_regr2 = MultiPolyRegr()
+    train_years = years
+    train_kms = kms
+    train_prices = prices
 
-    layer2_features = np.zeros([len(kms_train), 2])
-    layer2_features[:, 0] = pred_layer1
-    layer2_features[:, 1] = kms_train
+    year_kms = np.zeros([len(train_kms), 2])
+    year_kms[:, 0] = train_years
+    year_kms[:, 1] = train_kms
 
-    poly_regr2.fit(layer2_features, y_train)
+    year_kms2 = np.zeros([len(kms_year), 2])
+    year_kms2[:, 0] = year
+    year_kms2[:, 1] = kms_year
 
-    train_predictions = poly_regr2.predict(layer2_features)
+    regr1.fit(year_kms, train_prices)
+    regr2.fit(year_kms2, prices_year)
+    # minimums, best_coeffs, coeffs, r2_scores = regr.find_scaling_coeff(years, prices)
+    # fitted_line_plot = (years_range-minimums) ** (best_coeffs)
 
-    print("train Mape: ", mean_absolute_percentage_error(y_train, train_predictions))
+    year_kms_range = np.zeros([len(km_range), 2])
+    year_kms_range[:, 0] = year
+    year_kms_range[:, 1] = km_range
 
+<<<<<<< HEAD
     print("-------------double lin regression stats")
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -481,9 +641,19 @@ if __name__ == "__main__2":
     layered_lin_regr = LayeredLinRegr()
     layered_lin_regr.fit(X_train, y_train)
     layered_lin_regr.predict_and_score(X_test, y_test)
+=======
+    # print(year_kms_range)
 
-    print("-------------Layered double polyRegr stats")
+    predictions1 = regr1.predict(year_kms_range)
+    predictions2 = regr2.predict(year_kms_range)
 
+    if cat:
+        categories = get_submodel_category_feature(df_year, brand, model)
+>>>>>>> dev/ver-0.1
+
+        # print(categories)
+
+<<<<<<< HEAD
     X_train, X_test, y_train, y_test = train_test_split(
         features, prices, random_state=1
     )
@@ -500,15 +670,31 @@ if __name__ == "__main__2":
 
     full_predictions = layered_regr.predict(features)
     percentage_errors = (prices - full_predictions) / prices
+=======
+        colors = ["b", "g", "m", "y"]
 
-    df["predictions"] = full_predictions
-    df["error"] = percentage_errors
+        data_color_slices = [[], [], [], []]
+>>>>>>> dev/ver-0.1
 
+        for i, category in enumerate(categories):
+            cat_index = np.where(category == 1)[0][0]
+            data_color_slices[cat_index].append(i)
+
+<<<<<<< HEAD
     df = df[["title", "submodel", "km", "year", "price", "predictions", "error", "url"]]
     df.to_csv("csv_data/corolla_predictions.csv")
+=======
+        for i, data_slice in enumerate(data_color_slices):
+            plt.scatter(kms_year[data_slice], prices_year[data_slice], color=colors[i])
+    else:
+        plt.scatter(kms_year, prices_year)
+>>>>>>> dev/ver-0.1
 
-    larger_predictions = np.where(train_predictions > y_train, 1, 0)
+    if show_fitted_curve:
+        plt.plot(km_range, predictions1, c="r")
+        plt.plot(km_range, predictions2, c="g")
 
+<<<<<<< HEAD
     # perc_df = pd.DataFrame(percentage_errors, columns = ["error"])
     # perc_df.to_csv("csv_data/percentage_errors.csv")
 
@@ -543,3 +729,21 @@ if __name__ == "__main__":
         df = convert_df_types(df)
         df = get_valid_data(df)
         print(f"{brand_model_pair[0]} {brand_model_pair[1]}s: {len(df)}")
+=======
+    plt.xlabel("Kilometers")
+    plt.ylabel("Price $CAD")
+    plt.title(
+        f"Price of {year} {brand.capitalize()} {model.capitalize()}s given their mileage"
+    )
+    plt.show()
+
+
+if __name__ == "__main__":
+    # plot_year_price("honda", "civic", False)
+    # plot_year_price("honda", "civic", True)
+    plot_year_mileage_price(2015, "honda", "civic", True, cat=False)
+    # plot_year_mileage_price(2015, "honda", "civic", True, cat=False)  # good data
+    # plot_year_mileage_price(2022, "honda", "civic", False, cat=False)
+    # plot_year_mileage_price(2022, "honda", "civic", True, cat=False)
+    # plot_year_mileage_price(2022, "honda", "civic", True)  # bad data
+>>>>>>> dev/ver-0.1
